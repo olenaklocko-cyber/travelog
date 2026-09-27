@@ -29,10 +29,40 @@
 .zaholovok-titul h1 {
   font-size: 40px;
   margin-bottom: 8px;
+}
+
+.zaholovok-titul h1 .h1-tekst {
   background: linear-gradient(120deg, #0f766e 0%, #0ea5e9 55%, #8b5cf6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.zaholovok-titul h1 .h1-emo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: 14px;
+  font-size: 33px;
+}
+
+.blysk {
+  display: inline-block;
+  animation: zirka-blysk 2.2s ease-in-out infinite;
+}
+
+@keyframes zirka-blysk {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.7));
+  }
+  50% {
+    transform: scale(1.28);
+    opacity: 0.72;
+    filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.95));
+  }
 }
 
 .zaholovok-titul .privit {
@@ -333,6 +363,12 @@
 
   .zaholovok-titul h1 {
     font-size: 27px;
+  }
+
+  .zaholovok-titul h1 .h1-emo {
+    gap: 6px;
+    margin-left: 8px;
+    font-size: 23px;
   }
 
   .zaholovok-titul .privit {

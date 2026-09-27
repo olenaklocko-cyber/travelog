@@ -365,7 +365,14 @@ function Golovna({ korystuvach }) {
       <div className="vmist">
         <div className="zaholovok">
           <div className="zaholovok-titul">
-            <h1>Світ моїх мрій 🌍</h1>
+            <h1>
+              <span className="h1-tekst">Світ моїх мрій</span>
+              <span className="h1-emo">
+                <span>✈️</span>
+                <span>🌍</span>
+                <span className="blysk">✨</span>
+              </span>
+            </h1>
             <p className="privit">
               Привіт, мандрівнику! Ти вже відвідав{" "}
               <b className="c-vidvidani">{lychilnyky.vidvidani}</b> локацій,
