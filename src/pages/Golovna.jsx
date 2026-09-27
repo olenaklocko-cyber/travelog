@@ -14,7 +14,7 @@ import {
   Tag,
   message,
 } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SendOutlined } from "@ant-design/icons";
 import supabase from "../supabase";
 import Shapka from "../components/Shapka";
 import { krajiny, krajinyVyboru, statusy, dodatyKrayinuMapy } from "../data/krajiny";
@@ -69,10 +69,34 @@ const kolirStatusu = {
 };
 
 const vkladkyFiltra = [
-  { znachennya: "Усі", nadpis: "Усі подорожі", ikona: "🌍" },
-  { znachennya: "Активні збори", nadpis: "Активні збори", ikona: "💰" },
-  { znachennya: "Плануються", nadpis: "Плануються", ikona: "📅" },
-  { znachennya: "Вже відвідані", nadpis: "Вже відвідані", ikona: "✅" },
+  {
+    znachennya: "Усі",
+    nadpis: "Усі подорожі",
+    ikona: "🌍",
+    kolir: "linear-gradient(135deg, #0f766e, #14b8a6)",
+    smuga: "0 8px 20px rgba(15, 118, 110, 0.4)",
+  },
+  {
+    znachennya: "Активні збори",
+    nadpis: "Активні збори",
+    ikona: "💰",
+    kolir: "linear-gradient(135deg, #f59e0b, #fbbf24)",
+    smuga: "0 8px 20px rgba(245, 158, 11, 0.4)",
+  },
+  {
+    znachennya: "Плануються",
+    nadpis: "Плануються",
+    ikona: "📅",
+    kolir: "linear-gradient(135deg, #8b5cf6, #a78bfa)",
+    smuga: "0 8px 20px rgba(139, 92, 246, 0.4)",
+  },
+  {
+    znachennya: "Вже відвідані",
+    nadpis: "Вже відвідані",
+    ikona: "✅",
+    kolir: "linear-gradient(135deg, #16a34a, #4ade80)",
+    smuga: "0 8px 20px rgba(22, 163, 74, 0.4)",
+  },
 ];
 
 function Golovna({ korystuvach }) {
@@ -138,6 +162,15 @@ function Golovna({ korystuvach }) {
   useEffect(() => {
     zavantazhyty();
   }, [zavantazhyty]);
+
+  const lychilnyky = useMemo(
+    () => ({
+      vidvidani: podorozhi.filter((p) => p.status === "Вже відвідані").length,
+      aktivni: podorozhi.filter((p) => p.status === "Активні збори").length,
+      planuyutsya: podorozhi.filter((p) => p.status === "Плануються").length,
+    }),
+    [podorozhi]
+  );
 
   const vybrani = useMemo(() => {
     const zapyt = poshuk.trim().toLowerCase();
@@ -332,8 +365,15 @@ function Golovna({ korystuvach }) {
       <div className="vmist">
         <div className="zaholovok">
           <div className="zaholovok-titul">
-            <h1>🌍 Мої подорожі</h1>
-            <p>Збирай гроші, плануй мандрівки та відкривай світ</p>
+            <h1>Світ моїх мрій 🌍</h1>
+            <p className="privit">
+              Привіт, мандрівнику! Ти вже відвідав{" "}
+              <b className="c-vidvidani">{lychilnyky.vidvidani}</b> локацій,
+              активно збираєш гроші на{" "}
+              <b className="c-aktivni">{lychilnyky.aktivni}</b> напрямки та
+              плануєш ще{" "}
+              <b className="c-planuyutsya">{lychilnyky.planuyutsya}</b> мрій!
+            </p>
           </div>
           <Button
             type="primary"
@@ -349,8 +389,8 @@ function Golovna({ korystuvach }) {
           <Input
             allowClear
             size="large"
-            prefix={<SearchOutlined className="lupa" />}
-            placeholder="Пошук за містом чи країною... не знайшли тут — знайдемо в інтернеті!"
+            prefix={<SendOutlined className="lupa" />}
+            placeholder="Куди летимо цього разу? Введіть будь-яку країну світу..."
             value={poshuk}
             onChange={(e) => setPoshuk(e.target.value)}
             className="velykyy-poshuk"
@@ -361,6 +401,11 @@ function Golovna({ korystuvach }) {
                 key={v.znachennya}
                 type="button"
                 className={`vkladka ${filtr === v.znachennya ? "aktyvna" : ""}`}
+                style={
+                  filtr === v.znachennya
+                    ? { background: v.kolir, boxShadow: v.smuga }
+                    : undefined
+                }
                 onClick={() => setFiltr(v.znachennya)}
               >
                 <span className="vkladka-ikona">{v.ikona}</span>

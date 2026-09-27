@@ -1,21 +1,66 @@
+/* Яскравий верхній блок */
 .zaholovok {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 55%, #ecfeff 100%);
+  border: 1.5px solid rgba(13, 148, 136, 0.18);
+  border-radius: 22px;
+  padding: 22px 26px;
+  box-shadow: 0 10px 30px rgba(15, 118, 110, 0.14);
+  position: relative;
+  overflow: hidden;
+}
+
+.zaholovok::after {
+  content: "✈️";
+  position: absolute;
+  right: -12px;
+  bottom: -22px;
+  font-size: 92px;
+  opacity: 0.12;
+  transform: rotate(-12deg);
+  pointer-events: none;
 }
 
 .zaholovok-titul h1 {
-  font-size: 36px;
-  color: #1a1a2e;
-  margin-bottom: 6px;
+  font-size: 40px;
+  margin-bottom: 8px;
+  background: linear-gradient(120deg, #0f766e 0%, #0ea5e9 55%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.zaholovok-titul p {
-  color: #777;
+.zaholovok-titul .privit {
+  color: #556;
   font-size: 17px;
+  line-height: 1.55;
+  max-width: 680px;
+}
+
+.zaholovok-titul .privit b {
+  font-size: 19px;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+.c-vidvidani {
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+.c-aktivni {
+  color: #d97706;
+  background: #fffbeb;
+}
+
+.c-planuyutsya {
+  color: #7c3aed;
+  background: #f5f3ff;
 }
 
 /* Панель керування */
@@ -27,24 +72,33 @@
   box-shadow: 0 6px 24px rgba(15, 118, 110, 0.1);
 }
 
+/* Стильний рядок пошуку */
 .velykyy-poshuk.ant-input-affix-wrapper {
-  height: 54px;
+  height: 56px;
   font-size: 16px;
-  border-radius: 14px;
-  border-color: #d9e6e5;
+  border-radius: 999px;
+  border: 2px solid #d9e6e5;
+  background: #f8fbfb;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.08);
 }
 
 .velykyy-poshuk.ant-input-affix-wrapper:focus,
 .velykyy-poshuk.ant-input-affix-wrapper:hover {
   border-color: #0d9488;
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.16);
+}
+
+.velykyy-poshuk.ant-input-affix-wrapper input::placeholder {
+  color: #8aa0a0;
 }
 
 .lupa {
   color: #0d9488;
-  font-size: 18px;
+  font-size: 20px;
+  transform: rotate(-25deg);
 }
 
+/* Яскраві кнопки-фільтри */
 .vkladky {
   display: flex;
   flex-wrap: wrap;
@@ -58,26 +112,27 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 16px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #445;
-  background: #f1f7f6;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #4b5563;
+  background: #f3f4f6;
   border: 2px solid transparent;
-  border-radius: 12px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .vkladka:hover {
-  background: #dff1ee;
-  color: #0d9488;
+  background: #e5e7eb;
+  color: #374151;
+  transform: translateY(-2px);
 }
 
 .vkladka.aktyvna {
-  background: linear-gradient(135deg, #0d9488, #14b8a6);
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .vkladka-ikona {
@@ -267,14 +322,25 @@
     flex-direction: column;
     align-items: stretch;
     text-align: center;
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+
+  .zaholovok::after {
+    font-size: 64px;
+    bottom: -14px;
   }
 
   .zaholovok-titul h1 {
-    font-size: 26px;
+    font-size: 27px;
   }
 
-  .zaholovok-titul p {
+  .zaholovok-titul .privit {
     font-size: 15px;
+  }
+
+  .zaholovok-titul .privit b {
+    font-size: 16px;
   }
 
   .panel {
@@ -283,8 +349,9 @@
 
   .vkladka {
     flex: 1 1 calc(50% - 5px);
-    font-size: 14px;
-    padding: 11px 8px;
+    font-size: 15px;
+    padding: 13px 8px;
+    border-radius: 14px;
   }
 
   .sitka {
