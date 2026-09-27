@@ -146,11 +146,9 @@ function Golovna({ korystuvach }) {
         vytrachenoSuma: vytracheno[t.id] || 0,
       }));
 
-      // Вітрина ПУБЛІЧНА: 12 мок-карток бачать УСІ акаунти.
-      // Приховані мок-картки враховуємо лише для власника (його особисті видалення).
-      const pryhovani = new Set(
-        (vlasnyk ? prykhovaniMock(korystuvach) : []).map(String)
-      );
+      // Кожен акаунт має свій список прихованих карток:
+      // чиє видалення діє лише під цим акаунтом, на інших — не впливає.
+      const pryhovani = new Set(prykhovaniMock(korystuvach).map(String));
       setPodorozhi(
         zastosuvatyBudzety(
           [
@@ -166,7 +164,7 @@ function Golovna({ korystuvach }) {
     } finally {
       setZavantazhennya(false);
     }
-  }, [korystuvach, vlasnyk]);
+  }, [korystuvach]);
 
   useEffect(() => {
     zavantazhyty();
@@ -326,8 +324,6 @@ function Golovna({ korystuvach }) {
 
   const vydatyPodorozh = async (p) => {
     const id = String(p.id);
-    // Публічну вітрину (мок-картки) може видалити лише власник
-    if (id.startsWith("mock-") && !vlasnyk) return;
     if (id.startsWith("api-")) {
       vydalytyPodorozhAPI(korystuvach, id);
     } else if (id.startsWith("mock-")) {
@@ -551,23 +547,21 @@ function Golovna({ korystuvach }) {
                         e.currentTarget.style.display = "none";
                       }}
                     />
-                    {(!mockKarta || vlasnyk) && (
-                      <Popconfirm
-                        title={`Видалити «${p.title}»?`}
-                        description="Подорож зникне з вашої вітрини"
-                        okText="Видалити"
-                        cancelText="Скасувати"
-                        okButtonProps={{ danger: true }}
-                        onConfirm={() => vydatyPodorozh(p)}
+                    <Popconfirm
+                      title={`Видалити «${p.title}»?`}
+                      description="Подорож зникне лише у вашому акаунті"
+                      okText="Видалити"
+                      cancelText="Скасувати"
+                      okButtonProps={{ danger: true }}
+                      onConfirm={() => vydatyPodorozh(p)}
+                    >
+                      <button
+                        className="karta-vidalyty"
+                        aria-label="Видалити подорож"
                       >
-                        <button
-                          className="karta-vidalyty"
-                          aria-label="Видалити подорож"
-                        >
-                          ×
-                        </button>
-                      </Popconfirm>
-                    )}
+                        ×
+                      </button>
+                    </Popconfirm>
                     <span className="prapor-kolo">{krajyna.prapor}</span>
                   </div>
 
