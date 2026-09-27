@@ -116,48 +116,57 @@ function Golovna({ korystuvach }) {
   const [messageApi, contextHolder] = message.useMessage();
 
   const zavantazhyty = useCallback(async () => {
-    const [{ data: trips }, { data: operaciyi }] = await Promise.all([
-      supabase
-        .from("trips")
-        .select("*")
-        .eq("user_id", korystuvach.id)
-        .order("id", { ascending: false }),
-      supabase
-        .from("expenses")
-        .select("trip_id, amount, type")
-        .eq("user_id", korystuvach.id),
-    ]);
+    try {
+      const [{ data: trips }, { data: operaciyi }] = await Promise.all([
+        supabase
+          .from("trips")
+          .select("*")
+          .eq("user_id", korystuvach.id)
+          .order("id", { ascending: false }),
+        supabase
+          .from("expenses")
+          .select("trip_id, amount, type")
+          .eq("user_id", korystuvach.id),
+      ]);
 
-    const zibrano = {};
-    const vytracheno = {};
-    (operaciyi || []).forEach((o) => {
-      const suma = Number(o.amount) || 0;
-      if (o.type === "Дохід") {
-        zibrano[o.trip_id] = (zibrano[o.trip_id] || 0) + suma;
-      } else {
-        vytracheno[o.trip_id] = (vytracheno[o.trip_id] || 0) + suma;
-      }
-    });
+      const zibrano = {};
+      const vytracheno = {};
+      (operaciyi || []).forEach((o) => {
+        const suma = Number(o.amount) || 0;
+        if (o.type === "Дохід") {
+          zibrano[o.trip_id] = (zibrano[o.trip_id] || 0) + suma;
+        } else {
+          vytracheno[o.trip_id] = (vytracheno[o.trip_id] || 0) + suma;
+        }
+      });
 
-    const realni = (trips || []).map((t) => ({
-      ...t,
-      zibrano: zibrano[t.id] || 0,
-      vytrachenoSuma: vytracheno[t.id] || 0,
-    }));
+      const realni = (trips || []).map((t) => ({
+        ...t,
+        zibrano: zibrano[t.id] || 0,
+        vytrachenoSuma: vytracheno[t.id] || 0,
+      }));
 
-    const pryhovani = new Set(prykhovaniMock(korystuvach).map(String));
-    setPodorozhi(
-      zastosuvatyBudzety(
-        [
-          ...realni,
-          ...zavantazhPodorozhiAPI(korystuvach),
-          ...mockTrips,
-        ].filter((p) => !pryhovani.has(String(p.id))),
-        korystuvach
-      )
-    );
-    setZavantazhennya(false);
-  }, [korystuvach]);
+      // Вітрина ПУБЛІЧНА: 12 мок-карток бачать УСІ акаунти.
+      // Приховані мок-картки враховуємо лише для власника (його особисті видалення).
+      const pryhovani = new Set(
+        (vlasnyk ? prykhovaniMock(korystuvach) : []).map(String)
+      );
+      setPodorozhi(
+        zastosuvatyBudzety(
+          [
+            ...realni,
+            ...zavantazhPodorozhiAPI(korystuvach),
+            ...mockTrips,
+          ].filter((p) => !pryhovani.has(String(p.id))),
+          korystuvach
+        )
+      );
+    } catch {
+      // мережа недоступна — вітрина не спорожнюється, лишаємо наявні картки
+    } finally {
+      setZavantazhennya(false);
+    }
+  }, [korystuvach, vlasnyk]);
 
   useEffect(() => {
     zavantazhyty();
@@ -317,6 +326,8 @@ function Golovna({ korystuvach }) {
 
   const vydatyPodorozh = async (p) => {
     const id = String(p.id);
+    // Публічну вітрину (мок-картки) може видалити лише власник
+    if (id.startsWith("mock-") && !vlasnyk) return;
     if (id.startsWith("api-")) {
       vydalytyPodorozhAPI(korystuvach, id);
     } else if (id.startsWith("mock-")) {
@@ -519,8 +530,8 @@ function Golovna({ korystuvach }) {
                 budzet > 0
                   ? Math.min(100, Math.round((p.zibrano / budzet) * 100))
                   : 0;
-              const chuzheZibrano =
-                !vlasnyk && String(p.id).startsWith("mock-");
+              const mockKarta = String(p.id).startsWith("mock-");
+              const chuzheZibrano = !vlasnyk && mockKarta;
               const kolir =
                 kolirStatusu[p.status] || kolirStatusu["Активні збори"];
               const krajyna = krajiny[p.country_code] || {
@@ -540,21 +551,23 @@ function Golovna({ korystuvach }) {
                         e.currentTarget.style.display = "none";
                       }}
                     />
-                    <Popconfirm
-                      title={`Видалити «${p.title}»?`}
-                      description="Подорож зникне з вашої вітрини"
-                      okText="Видалити"
-                      cancelText="Скасувати"
-                      okButtonProps={{ danger: true }}
-                      onConfirm={() => vydatyPodorozh(p)}
-                    >
-                      <button
-                        className="karta-vidalyty"
-                        aria-label="Видалити подорож"
+                    {(!mockKarta || vlasnyk) && (
+                      <Popconfirm
+                        title={`Видалити «${p.title}»?`}
+                        description="Подорож зникне з вашої вітрини"
+                        okText="Видалити"
+                        cancelText="Скасувати"
+                        okButtonProps={{ danger: true }}
+                        onConfirm={() => vydatyPodorozh(p)}
                       >
-                        ×
-                      </button>
-                    </Popconfirm>
+                        <button
+                          className="karta-vidalyty"
+                          aria-label="Видалити подорож"
+                        >
+                          ×
+                        </button>
+                      </Popconfirm>
+                    )}
                     <span className="prapor-kolo">{krajyna.prapor}</span>
                   </div>
 
