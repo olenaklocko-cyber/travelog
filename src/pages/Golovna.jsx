@@ -27,7 +27,7 @@ import {
   prykhovatyMock,
 } from "../data/podorozhiAPI";
 import { populyarniDestynaciyi } from "../data/populyarniDestynaciyi";
-import { zastosuvatyBudzety } from "../data/budzety";
+import { zastosuvatyBudzety, zastosuvatyZibrano } from "../data/budzety";
 import { ciToVlasnyk } from "../data/dostup";
 import { mockTrips } from "../data/mockTrips";
 import "./Golovna.css";
@@ -103,7 +103,7 @@ function Golovna({ korystuvach }) {
   const nav = useNavigate();
   const vlasnyk = ciToVlasnyk(korystuvach);
   const [podorozhi, setPodorozhi] = useState(() =>
-    zastosuvatyBudzety(mockTrips, korystuvach)
+    zastosuvatyBudzety(zastosuvatyZibrano(mockTrips, korystuvach), korystuvach)
   );
   const [zavantazhennya, setZavantazhennya] = useState(false);
   const [poshuk, setPoshuk] = useState("");
@@ -151,11 +151,14 @@ function Golovna({ korystuvach }) {
       const pryhovani = new Set(prykhovaniMock(korystuvach).map(String));
       setPodorozhi(
         zastosuvatyBudzety(
-          [
-            ...realni,
-            ...zavantazhPodorozhiAPI(korystuvach),
-            ...mockTrips,
-          ].filter((p) => !pryhovani.has(String(p.id))),
+          zastosuvatyZibrano(
+            [
+              ...realni,
+              ...zavantazhPodorozhiAPI(korystuvach),
+              ...mockTrips,
+            ].filter((p) => !pryhovani.has(String(p.id))),
+            korystuvach
+          ),
           korystuvach
         )
       );
@@ -527,7 +530,7 @@ function Golovna({ korystuvach }) {
                   ? Math.min(100, Math.round((p.zibrano / budzet) * 100))
                   : 0;
               const mockKarta = String(p.id).startsWith("mock-");
-              const chuzheZibrano = !vlasnyk && mockKarta;
+              const chuzheZibrano = !vlasnyk && mockKarta && !p.zibranoSvoe;
               const kolir =
                 kolirStatusu[p.status] || kolirStatusu["Активні збори"];
               const krajyna = krajiny[p.country_code] || {

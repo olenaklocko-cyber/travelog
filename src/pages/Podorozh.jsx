@@ -30,7 +30,7 @@ import { krajiny } from "../data/krajiny";
 import { obkladynkaPodorozhi } from "../data/obkladynky";
 import { faktyKrayin } from "../data/faktyKrayin";
 import { chekListy } from "../data/chekListy";
-import { otrymatyBudzet, zminytyBudzet } from "../data/budzety";
+import { otrymatyBudzet, zminytyBudzet, otrymatyZibrano, zminytyZibrano } from "../data/budzety";
 import {
   ciToVlasnyk,
   uidKorystuvacha,
@@ -142,6 +142,9 @@ function PodorozhTilo({ id, korystuvach }) {
   const [budzetZminenyy, setBudzetZminenyy] = useState(() =>
     otrymatyBudzet(id, mock?.budget, korystuvach)
   );
+  const [zibranoNad, setZibranoNad] = useState(() =>
+    otrymatyZibrano(id, korystuvach)
+  );
 
   useEffect(() => {
     if (mock) return undefined;
@@ -184,19 +187,32 @@ function PodorozhTilo({ id, korystuvach }) {
   }, [vytraty, klyuchVytrat, zavantazhennya]);
 
   const budzet = budzetZminenyy;
-  const zibrano = Number(podorozh?.zibrano) || 0;
+  const zibranoBase = Number(podorozh?.zibrano) || 0;
+  // Власноруч вказана сума зібраного персональна: власник бачить свою
+  // (або базову з витрат), чужий — лише власноруч введену, інакше прочерк.
+  const zibrano = vlasnyk
+    ? zibranoNad ?? zibranoBase
+    : zibranoNad ?? 0;
   const vytracheno = vytraty.reduce((s, v) => s + Number(v.suma), 0);
   const zalyshylos = Math.max(0, budzet - zibrano);
 
   const vytratyYe = vytraty.length > 0;
-  const pokazZibrano = vlasnyk ? `${formatHryven(zibrano)} грн` : prohorynka;
+  const pokazZibrano = vlasnyk
+    ? `${formatHryven(zibrano)} грн`
+    : zibranoNad !== undefined
+      ? `${formatHryven(zibranoNad)} грн`
+      : prohorynka;
   const pokazVytracheno =
     vlasnyk || vytratyYe ? `${formatHryven(vytracheno)} грн` : prohorynka;
   const zalyshDoPokazu = vlasnyk
     ? zalyshylos
-    : Math.max(0, budzet - vytracheno);
+    : zibranoNad !== undefined
+      ? Math.max(0, budzet - zibranoNad)
+      : Math.max(0, budzet - vytracheno);
   const pokazZalysh =
-    vlasnyk || vytratyYe ? `${formatHryven(zalyshDoPokazu)} грн` : prohorynka;
+    vlasnyk || zibranoNad !== undefined || vytratyYe
+      ? `${formatHryven(zalyshDoPokazu)} грн`
+      : prohorynka;
   const clCysla = (znachennya) =>
     znachennya === prohorynka ? "znachennya prycher" : "znachennya";
 
@@ -253,6 +269,17 @@ function PodorozhTilo({ id, korystuvach }) {
     const znachennya = Number(v) || 0;
     setBudzetZminenyy(znachennya);
     zminytyBudzet(id, znachennya, korystuvach);
+  };
+
+  const zminytyZibranoLokalno = (v) => {
+    if (v === null || v === undefined) {
+      zminytyZibrano(id, null, korystuvach);
+      setZibranoNad(undefined);
+      return;
+    }
+    const znachennya = Number(v) || 0;
+    zminytyZibrano(id, znachennya, korystuvach);
+    setZibranoNad(znachennya);
   };
 
   const dodatyPunkt = () => {
@@ -410,6 +437,20 @@ function PodorozhTilo({ id, korystuvach }) {
                 onChange={zminytyBudzetLokalno}
                 addonAfter="грн"
                 style={{ width: 210 }}
+              />
+            </div>
+            <div className="budzet-ryadok">
+              <span className="budzet-pidkazka">
+                💰 Вже зібрано (ваша особиста сума):
+              </span>
+              <InputNumber
+                min={0}
+                max={100000000}
+                value={zibranoNad ?? (vlasnyk ? zibranoBase : null)}
+                onChange={zminytyZibranoLokalno}
+                addonAfter="грн"
+                style={{ width: 210 }}
+                placeholder="не вказано"
               />
             </div>
           </div>
